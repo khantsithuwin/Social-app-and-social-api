@@ -20,7 +20,8 @@ model User {
     password String
     posts    Post[]
     comments Comment[]
-    created   DateTime  @default(now())
+    likes    Like[]
+    created  DateTime  @default(now())
 }
 
 model Post {
@@ -29,7 +30,18 @@ model Post {
     userId   Int
     user     User      @relation(fields: [userId], references: [id])
     comments Comment[]
+    likes    Like[]
     created  DateTime  @default(now())
+}
+
+model Like {
+    id     Int  @id @default(autoincrement())
+    userId Int
+    postId Int
+    user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, postId])
 }
 
 model Comment {

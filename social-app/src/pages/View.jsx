@@ -7,7 +7,9 @@ import PostCard from "../components/PostCard";
 import { useApp, queryClient } from "../AppProvider.jsx";
 
 async function fetchPosts(id) {
-  const res = await fetch(`http://localhost:8800/posts/${id}`);
+  const token = localStorage.getItem("token");
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const res = await fetch(`http://localhost:8800/posts/${id}`, { headers });
   return res.json();
 }
 

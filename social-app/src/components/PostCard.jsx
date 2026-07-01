@@ -10,17 +10,21 @@ import {
 } from "@mui/material";
 import { green } from "@mui/material/colors";
 import {
-  FavoriteBorderOutlined as LikeIcon,
+  Favorite as LikeFilledIcon,
+  FavoriteBorderOutlined as LikeOutlineIcon,
   ChatBubbleOutlineOutlined as CommentIcon,
   DeleteOutlineOutlined as DeleteIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router";
 import { useApp, queryClient } from "../AppProvider.jsx";
+import { useState } from "react";
 
 export default function PostCard({ post, onDeleted }) {
   const navigate = useNavigate();
   const { auth } = useApp();
   const canDelete = auth?.id === post.userId;
+  const [liked, setLiked] = useState(post.likedByMe ?? false);
+  const [likesCount, setLikesCount] = useState(post.likesCount ?? 0);
 
   const deletePost = async () => {
     const token = localStorage.getItem("token");
@@ -36,6 +40,28 @@ export default function PostCard({ post, onDeleted }) {
       await queryClient.invalidateQueries({ queryKey: ["posts"] });
       await queryClient.invalidateQueries({ queryKey: ["post", String(post.id)] });
       onDeleted?.();
+    }
+  };
+
+  const toggleLike = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return navigate("/login");
+
+    setLiked(!liked);
+    setLikesCount(liked ? likesCount - 1 : likesCount + 1);
+
+    const res = await fetch("http://localhost:8800/likes", {
+      method: "POST",
+      body: JSON.stringify({ postId: post.id }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      setLiked(liked);
+      setLikesCount(likesCount);
     }
   };
 
@@ -75,11 +101,11 @@ export default function PostCard({ post, onDeleted }) {
         </Box>
         <Box sx={{ mt: 2, display: "flex", justifyContent: "space-around" }}>
           <ButtonGroup>
-            <IconButton size="sm">
-              <LikeIcon color="error"></LikeIcon>
+            <IconButton size="sm" onClick={toggleLike}>
+              {liked ? <LikeFilledIcon color="error" /> : <LikeOutlineIcon color="error" />}
             </IconButton>
             <Button size="sm" variant="text">
-              10
+              {likesCount}
             </Button>
           </ButtonGroup>
           <ButtonGroup>

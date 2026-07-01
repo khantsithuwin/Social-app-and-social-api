@@ -5,7 +5,9 @@ import { useRef } from "react";
 import { queryClient } from "../AppProvider.jsx";
 
 async function fetchPosts() {
-  const res = await fetch("http://localhost:8800/posts");
+  const token = localStorage.getItem("token");
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const res = await fetch("http://localhost:8800/posts", { headers });
   return res.json();
 }
 
