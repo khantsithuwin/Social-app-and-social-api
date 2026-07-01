@@ -49,6 +49,8 @@ export default function PostCard({ post, onDeleted }) {
     const token = localStorage.getItem("token");
     if (!token) return navigate("/login");
 
+    const prevLiked = liked;
+    const prevCount = likesCount;
     setLiked(!liked);
     setLikesCount(liked ? likesCount - 1 : likesCount + 1);
 
@@ -61,9 +63,14 @@ export default function PostCard({ post, onDeleted }) {
       },
     });
 
-    if (!res.ok) {
-      setLiked(liked);
-      setLikesCount(likesCount);
+    if (res.ok) {
+      const data = await res.json();
+      setLiked(data.liked);
+      setLikesCount(data.likesCount);
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    } else {
+      setLiked(prevLiked);
+      setLikesCount(prevCount);
     }
   };
 
