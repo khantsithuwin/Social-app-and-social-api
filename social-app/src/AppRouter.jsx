@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 
 import { createBrowserRouter, RouterProvider } from "react-router";
 import View from "./pages/View";
+import Profile from "./pages/Profile";
 
 const router = createBrowserRouter([
   {
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
       {
         path: "/view/:id",
         element: <View />,
+      },
+      {
+        path: "/profile",
+        element: <Profile />,
       },
     ],
   },
