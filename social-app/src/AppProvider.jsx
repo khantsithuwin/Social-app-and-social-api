@@ -47,6 +47,51 @@ export default function AppProvider() {
     return createTheme({
       palette: {
         mode,
+        ...(mode === "dark"
+          ? {
+              primary: { main: "#ec4899", light: "#f472b6", dark: "#be185d" },
+              secondary: { main: "#8b5cf6", light: "#a78bfa", dark: "#6d28d9" },
+              background: { default: "#0f0f13", paper: "#1a1a23" },
+            }
+          : {
+              primary: { main: "#ec4899", light: "#f9a8d4", dark: "#be185d" },
+              secondary: { main: "#8b5cf6", light: "#c4b5fd", dark: "#6d28d9" },
+              background: { default: "#f5f5f7", paper: "#ffffff" },
+            }),
+      },
+      typography: {
+        fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+      },
+      shape: { borderRadius: 8 },
+      components: {
+        MuiCard: {
+          styleOverrides: {
+            root: {
+              backgroundImage: "none",
+              transition: "transform 0.15s ease, box-shadow 0.2s ease",
+            },
+          },
+        },
+        MuiButton: {
+          styleOverrides: {
+            root: {
+              textTransform: "none",
+              fontWeight: 600,
+              borderRadius: 12,
+              padding: "10px 20px",
+            },
+          },
+        },
+        MuiOutlinedInput: {
+          styleOverrides: {
+            root: { borderRadius: 12 },
+          },
+        },
+        MuiDialog: {
+          styleOverrides: {
+            paper: { backgroundImage: "none" },
+          },
+        },
       },
     });
   }, [mode]);

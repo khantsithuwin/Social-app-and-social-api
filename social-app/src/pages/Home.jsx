@@ -1,8 +1,16 @@
-import { Typography, Box, OutlinedInput, Button } from "@mui/material";
+import {
+  Typography,
+  Box,
+  OutlinedInput,
+  Button,
+  Avatar,
+  Skeleton,
+} from "@mui/material";
+import { green } from "@mui/material/colors";
 import PostCard from "../components/PostCard";
 import { useQuery } from "@tanstack/react-query";
 import { useRef } from "react";
-import { queryClient } from "../AppProvider.jsx";
+import { queryClient, useApp } from "../AppProvider.jsx";
 
 async function fetchPosts() {
   const token = localStorage.getItem("token");
@@ -13,6 +21,7 @@ async function fetchPosts() {
 
 export default function Home() {
   const contentRef = useRef();
+  const { auth } = useApp();
   const {
     data: posts,
     error,
@@ -24,8 +33,8 @@ export default function Home() {
 
   if (error) {
     return (
-      <Box>
-        <Typography>{error.message}</Typography>
+      <Box sx={{ textAlign: "center", mt: 8 }}>
+        <Typography color="error">{error.message}</Typography>
       </Box>
     );
   }
@@ -33,7 +42,17 @@ export default function Home() {
   if (isLoading) {
     return (
       <Box>
-        <Typography>Loading....</Typography>
+        <Box sx={{ mb: 3 }}>
+          <Skeleton variant="rounded" height={100} sx={{ borderRadius: 3 }} />
+        </Box>
+        {[1, 2, 3].map((i) => (
+          <Skeleton
+            key={i}
+            variant="rounded"
+            height={140}
+            sx={{ borderRadius: 3, mb: 2 }}
+          />
+        ))}
       </Box>
     );
   }
@@ -54,34 +73,81 @@ export default function Home() {
     });
 
     if (res.ok) {
+      contentRef.current.value = "";
       await queryClient.invalidateQueries({ queryKey: ["posts"] });
     }
   };
+
   return (
     <Box>
-      <Box sx={{ mb: 2 }}>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            addPost();
-            e.currentTarget.reset();
-          }}
-        >
-          <OutlinedInput
-            inputRef={contentRef}
-            fullWidth
-            placeholder="What on your mind..."
-            sx={{ mb: 2 }}
-          ></OutlinedInput>
-          <Button type="submit" fullWidth variant="contained">
-            Add Post
-          </Button>
-        </form>
+      <Box
+        sx={{
+          mb: 3,
+          p: 2.5,
+          borderRadius: "16px",
+          bgcolor: "background.paper",
+          border: "1px solid",
+          borderColor: "divider",
+        }}
+      >
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Avatar
+            sx={{
+              height: 40,
+              width: 40,
+              background: `linear-gradient(135deg, ${green[500]}, ${green[300]})`,
+              fontWeight: 700,
+              fontSize: 16,
+            }}
+          >
+            {auth?.name?.[0]?.toUpperCase() || "U"}
+          </Avatar>
+          <Box sx={{ flex: 1 }}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                addPost();
+              }}
+            >
+              <OutlinedInput
+                inputRef={contentRef}
+                fullWidth
+                multiline
+                minRows={2}
+                maxRows={4}
+                placeholder="What's on your mind?"
+                sx={{
+                  mb: 1.5,
+                  bgcolor: "transparent",
+                  "& fieldset": { border: "none" },
+                  p: 0,
+                  fontSize: 14,
+                }}
+              />
+              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size="small"
+                  sx={{
+                    px: 3,
+                    background: "linear-gradient(135deg, #ec4899, #8b5cf6)",
+                    "&:hover": {
+                      background: "linear-gradient(135deg, #db2777, #7c3aed)",
+                    },
+                  }}
+                >
+                  Post
+                </Button>
+              </Box>
+            </form>
+          </Box>
+        </Box>
       </Box>
       <Box>
-        {posts.map((post) => {
-          return <PostCard key={post.id} post={post} />;
-        })}
+        {posts.map((post) => (
+          <PostCard key={post.id} post={post} />
+        ))}
       </Box>
     </Box>
   );

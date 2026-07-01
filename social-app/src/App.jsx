@@ -8,7 +8,7 @@ export default function App() {
     <div>
       <Header />
       <AppDrawer />
-      <Container maxWidth="sm" sx={{ mt: 4 }}>
+      <Container maxWidth="sm" sx={{ mt: 3, mb: 4 }}>
         <Outlet />
       </Container>
     </div>

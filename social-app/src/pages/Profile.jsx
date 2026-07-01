@@ -3,9 +3,8 @@ import {
   Box,
   Avatar,
   Button,
-  Divider,
+  Skeleton,
 } from "@mui/material";
-import { green, lightGreen } from "@mui/material/colors";
 import { useNavigate } from "react-router";
 import { useApp } from "../AppProvider.jsx";
 import { useQuery } from "@tanstack/react-query";
@@ -41,48 +40,97 @@ export default function Profile() {
   if (isLoading) {
     return (
       <Box>
-        <Typography>Loading...</Typography>
+        <Skeleton variant="rounded" height={160} sx={{ borderRadius: "0 0 20px 20px" }} />
+        <Box sx={{ display: "flex", justifyContent: "center", mt: -6 }}>
+          <Skeleton variant="circular" width={96} height={96} />
+        </Box>
+        <Box sx={{ textAlign: "center", mt: 2 }}>
+          <Skeleton width={150} sx={{ mx: "auto" }} />
+          <Skeleton width={100} sx={{ mx: "auto", mt: 1 }} />
+        </Box>
       </Box>
     );
   }
+
+  const totalLikes = user.posts?.reduce(
+    (sum, p) => sum + (p.likesCount || 0),
+    0,
+  );
 
   return (
     <Box>
       <Box
         sx={{
-          height: 180,
-          background: `linear-gradient(135deg, ${green[700]}, ${lightGreen[400]})`,
-          borderRadius: "0 0 20px 20px",
+          height: 160,
+          background: "linear-gradient(135deg, #ec4899, #8b5cf6)",
+          borderRadius: "0 0 24px 24px",
           position: "relative",
         }}
-      >
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
-          <Avatar
-            sx={{
-              height: 96,
-              width: 96,
-              background: green[500],
-              fontSize: 40,
-              position: "absolute",
-              bottom: -48,
-              border: "4px solid white",
-            }}
-          >
-            {user.name[0].toUpperCase()}
-          </Avatar>
-        </Box>
+      />
+      <Box sx={{ display: "flex", justifyContent: "center", mt: -7 }}>
+        <Avatar
+          sx={{
+            height: 96,
+            width: 96,
+            background: "linear-gradient(135deg, #ec4899, #8b5cf6)",
+            fontSize: 36,
+            fontWeight: 700,
+            border: "4px solid",
+            borderColor: "background.default",
+            boxShadow: "0 2px 12px rgba(0,0,0,0.3)",
+          }}
+        >
+          {user.name[0].toUpperCase()}
+        </Avatar>
       </Box>
 
-      <Box sx={{ mt: 7, textAlign: "center" }}>
-        <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+      <Box sx={{ mt: 2, textAlign: "center" }}>
+        <Typography variant="h5" sx={{ fontWeight: 800 }}>
           {user.name}
         </Typography>
-        <Typography sx={{ color: "gray" }}>@{user.username}</Typography>
+        <Typography sx={{ color: "text.secondary", fontSize: 14 }}>
+          @{user.username}
+        </Typography>
         {user.bio && (
-          <Typography sx={{ mt: 1, color: "text.secondary" }}>
+          <Typography
+            sx={{
+              mt: 0.5,
+              color: "text.secondary",
+              fontSize: 13,
+              maxWidth: 300,
+              mx: "auto",
+            }}
+          >
             {user.bio}
           </Typography>
         )}
+      </Box>
+
+      <Box
+        sx={{
+          mt: 2,
+          display: "flex",
+          justifyContent: "center",
+          gap: 4,
+          textAlign: "center",
+        }}
+      >
+        <Box>
+          <Typography sx={{ fontWeight: 800, fontSize: 18 }}>
+            {user.posts?.length || 0}
+          </Typography>
+          <Typography sx={{ color: "text.secondary", fontSize: 12 }}>
+            Posts
+          </Typography>
+        </Box>
+        <Box>
+          <Typography sx={{ fontWeight: 800, fontSize: 18 }}>
+            {totalLikes || 0}
+          </Typography>
+          <Typography sx={{ color: "text.secondary", fontSize: 12 }}>
+            Likes
+          </Typography>
+        </Box>
       </Box>
 
       <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
@@ -90,24 +138,38 @@ export default function Profile() {
           variant="outlined"
           color="error"
           onClick={logout}
-          fullWidth
-          sx={{ maxWidth: 300 }}
+          sx={{
+            borderRadius: 3,
+            px: 4,
+            fontSize: 13,
+            fontWeight: 600,
+            borderColor: "divider",
+            color: "text.secondary",
+            "&:hover": {
+              borderColor: "#ef4444",
+              color: "#ef4444",
+              bgcolor: "rgba(239,68,68,0.08)",
+            },
+          }}
         >
           Logout
         </Button>
       </Box>
 
-      <Divider sx={{ my: 3 }} />
-
-      <Box>
-        <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
+      <Box sx={{ mt: 3 }}>
+        <Typography
+          variant="h6"
+          sx={{ mb: 2, fontWeight: 700, fontSize: 16 }}
+        >
           Posts
         </Typography>
         {user.posts?.map((post) => (
           <PostCard key={post.id} post={post} />
         ))}
         {user.posts?.length === 0 && (
-          <Typography sx={{ color: "gray" }}>No posts yet</Typography>
+          <Typography sx={{ color: "text.secondary", textAlign: "center", py: 4 }}>
+            No posts yet
+          </Typography>
         )}
       </Box>
     </Box>

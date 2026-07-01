@@ -192,7 +192,7 @@ router.get("/likes/:postId", async (req, res) => {
     where: { postId },
     include: { user: true },
   });
-  res.json(likes.map((l) => l.user));
+  res.json(likes.map((l: any) => l.user));
 });
 
 router.post("/likes", auth, async (req, res) => {

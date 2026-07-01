@@ -91,26 +91,58 @@ export default function PostCard({ post, onDeleted }) {
     }
   };
 
+  const timeAgo = (date) => {
+    const diff = Date.now() - new Date(date).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins}m`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}d`;
+    return new Date(date).toLocaleDateString();
+  };
+
   return (
     <Card
-      sx={{ mb: 2, borderRadius: 5, cursor: "pointer" }}
+      sx={{
+        mb: 2,
+        borderRadius: 3,
+        cursor: "pointer",
+        "&:hover": {
+          transform: "translateY(-1px)",
+          boxShadow: (theme) =>
+            theme.palette.mode === "dark"
+              ? "0 4px 20px rgba(0,0,0,0.4)"
+              : "0 4px 20px rgba(0,0,0,0.08)",
+        },
+      }}
       onClick={() => !likesOpen && navigate(`/view/${post.id}`)}
     >
-      <CardContent>
+      <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
         <Box sx={{ display: "flex", gap: 2 }}>
           <Box>
-            <Avatar sx={{ height: 52, width: 52, background: green[500] }}>
+            <Avatar
+              sx={{
+                height: 44,
+                width: 44,
+                background: `linear-gradient(135deg, ${green[500]}, ${green[300]})`,
+                fontWeight: 700,
+              }}
+            >
               {post.user.name[0].toUpperCase()}
             </Avatar>
           </Box>
-          <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight: "bold" }}>
-              {post.user.name}
-            </Typography>
-            <Typography sx={{ fontSize: 12, color: green[500] }}>
-              {post.created}
-            </Typography>
-            <Typography sx={{ mt: 1 }}>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography sx={{ fontWeight: 700, fontSize: 14 }}>
+                {post.user.name}
+              </Typography>
+              <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
+                {timeAgo(post.created)}
+              </Typography>
+            </Box>
+            <Typography sx={{ mt: 0.5, fontSize: 14, lineHeight: 1.5 }}>
               {post.content}
             </Typography>
           </Box>
@@ -119,45 +151,99 @@ export default function PostCard({ post, onDeleted }) {
               size="small"
               aria-label="delete post"
               onClick={deletePost}
-              sx={{ alignSelf: "flex-start" }}
+              sx={{ alignSelf: "flex-start", mt: 0.5 }}
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon sx={{ fontSize: 18 }} />
             </IconButton>
           )}
         </Box>
-        <Box sx={{ mt: 2, display: "flex", justifyContent: "space-around" }}>
-          <ButtonGroup>
-            <IconButton size="small" onClick={toggleLike}>
-              {liked ? <LikeFilledIcon color="error" /> : <LikeOutlineIcon color="error" />}
+        <Box sx={{ mt: 1.5, display: "flex", gap: 3, ml: 7 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <IconButton
+              size="small"
+              onClick={toggleLike}
+              sx={{
+                p: 0.5,
+                transition: "transform 0.15s ease",
+                "&:hover": { transform: "scale(1.15)" },
+              }}
+            >
+              {liked ? (
+                <LikeFilledIcon sx={{ fontSize: 20, color: "#ec4899" }} />
+              ) : (
+                <LikeOutlineIcon sx={{ fontSize: 20 }} />
+              )}
             </IconButton>
-            <Button size="small" variant="text" onClick={openLikes}>
+            <Button
+              size="small"
+              variant="text"
+              onClick={openLikes}
+              sx={{
+                minWidth: 0,
+                p: 0.5,
+                fontSize: 13,
+                fontWeight: 600,
+                color: liked ? "#ec4899" : "text.secondary",
+              }}
+            >
               {likesCount}
             </Button>
-          </ButtonGroup>
-          <ButtonGroup>
-            <IconButton size="small" onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/view/${post.id}`);
-            }}>
-              <CommentIcon sx={{ color: "gray" }}></CommentIcon>
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/view/${post.id}`);
+              }}
+              sx={{ p: 0.5 }}
+            >
+              <CommentIcon sx={{ fontSize: 20, color: "text.secondary" }} />
             </IconButton>
-            <Button size="small" variant="text">
+            <Button
+              size="small"
+              variant="text"
+              sx={{
+                minWidth: 0,
+                p: 0.5,
+                fontSize: 13,
+                fontWeight: 600,
+                color: "text.secondary",
+              }}
+            >
               {post.comments ? post.comments.length : 0}
             </Button>
-          </ButtonGroup>
+          </Box>
         </Box>
       </CardContent>
-      <Dialog open={likesOpen} onClose={() => setLikesOpen(false)}>
-        <DialogTitle>Liked by</DialogTitle>
-        <List sx={{ minWidth: 250 }}>
+      <Dialog
+        open={likesOpen}
+        onClose={() => setLikesOpen(false)}
+        PaperProps={{ sx: { borderRadius: 4 } }}
+      >
+        <DialogTitle sx={{ fontWeight: 700, pb: 1 }}>Liked by</DialogTitle>
+        <List sx={{ minWidth: 280, pt: 0 }}>
           {likers.map((user) => (
             <ListItem key={user.id}>
               <ListItemAvatar>
-                <Avatar sx={{ background: green[500] }}>
+                <Avatar
+                  sx={{
+                    background: `linear-gradient(135deg, ${green[500]}, ${green[300]})`,
+                    width: 36,
+                    height: 36,
+                    fontSize: 15,
+                    fontWeight: 700,
+                  }}
+                >
                   {user.name[0].toUpperCase()}
                 </Avatar>
               </ListItemAvatar>
-              <ListItemText primary={user.name} secondary={`@${user.username}`} />
+              <ListItemText
+                primary={user.name}
+                secondary={`@${user.username}`}
+                primaryTypographyProps={{ fontWeight: 600, fontSize: 14 }}
+                secondaryTypographyProps={{ fontSize: 12 }}
+              />
             </ListItem>
           ))}
         </List>
