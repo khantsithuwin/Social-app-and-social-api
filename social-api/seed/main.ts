@@ -61,6 +61,21 @@ async function main() {
     });
   }
   console.log("comment seeding complete");
+
+  console.log("like seeding started....");
+  for (let postId = 1; postId <= 20; postId++) {
+    const likers = new Set<number>();
+    const count = faker.number.int({ min: 1, max: 5 });
+    while (likers.size < count) {
+      likers.add(faker.number.int({ min: 1, max: 5 }));
+    }
+    for (const userId of likers) {
+      await prisma.like.create({
+        data: { userId, postId },
+      }).catch(() => {});
+    }
+  }
+  console.log("like seeding complete");
 }
 
 main();

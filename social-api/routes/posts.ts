@@ -186,6 +186,15 @@ router.delete("/comments/:id", auth, async (req, res) => {
   res.status(204).end();
 });
 
+router.get("/likes/:postId", async (req, res) => {
+  const postId = Number(req.params.postId);
+  const likes = await prisma.like.findMany({
+    where: { postId },
+    include: { user: true },
+  });
+  res.json(likes.map((l) => l.user));
+});
+
 router.post("/likes", auth, async (req, res) => {
   const postId = Number(req.body?.postId);
   const userId = res.locals.user.id;

@@ -5,7 +5,13 @@ import {
   ButtonGroup,
   Card,
   CardContent,
+  Dialog,
+  DialogTitle,
   IconButton,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
   Typography,
 } from "@mui/material";
 import { green } from "@mui/material/colors";
@@ -25,6 +31,8 @@ export default function PostCard({ post, onDeleted }) {
   const canDelete = auth?.id === post.userId;
   const [liked, setLiked] = useState(post.likedByMe ?? false);
   const [likesCount, setLikesCount] = useState(post.likesCount ?? 0);
+  const [likesOpen, setLikesOpen] = useState(false);
+  const [likers, setLikers] = useState([]);
 
   const deletePost = async (e) => {
     e.stopPropagation();
@@ -41,6 +49,15 @@ export default function PostCard({ post, onDeleted }) {
       onDeleted?.();
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       queryClient.invalidateQueries({ queryKey: ["user", post.userId] });
+    }
+  };
+
+  const openLikes = async (e) => {
+    e.stopPropagation();
+    const res = await fetch(`http://localhost:8800/likes/${post.id}`);
+    if (res.ok) {
+      setLikers(await res.json());
+      setLikesOpen(true);
     }
   };
 
@@ -77,7 +94,7 @@ export default function PostCard({ post, onDeleted }) {
   return (
     <Card
       sx={{ mb: 2, borderRadius: 5, cursor: "pointer" }}
-      onClick={() => navigate(`/view/${post.id}`)}
+      onClick={() => !likesOpen && navigate(`/view/${post.id}`)}
     >
       <CardContent>
         <Box sx={{ display: "flex", gap: 2 }}>
@@ -113,7 +130,7 @@ export default function PostCard({ post, onDeleted }) {
             <IconButton size="small" onClick={toggleLike}>
               {liked ? <LikeFilledIcon color="error" /> : <LikeOutlineIcon color="error" />}
             </IconButton>
-            <Button size="small" variant="text">
+            <Button size="small" variant="text" onClick={openLikes}>
               {likesCount}
             </Button>
           </ButtonGroup>
@@ -130,6 +147,21 @@ export default function PostCard({ post, onDeleted }) {
           </ButtonGroup>
         </Box>
       </CardContent>
+      <Dialog open={likesOpen} onClose={() => setLikesOpen(false)}>
+        <DialogTitle>Liked by</DialogTitle>
+        <List sx={{ minWidth: 250 }}>
+          {likers.map((user) => (
+            <ListItem key={user.id}>
+              <ListItemAvatar>
+                <Avatar sx={{ background: green[500] }}>
+                  {user.name[0].toUpperCase()}
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText primary={user.name} secondary={`@${user.username}`} />
+            </ListItem>
+          ))}
+        </List>
+      </Dialog>
     </Card>
   );
 }
