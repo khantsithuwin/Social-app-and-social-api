@@ -10,6 +10,7 @@ async function fetchPosts(id) {
   const token = localStorage.getItem("token");
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
   const res = await fetch(`http://localhost:8800/posts/${id}`, { headers });
+  if (!res.ok) throw new Error("Post not found");
   return res.json();
 }
 
@@ -39,8 +40,8 @@ export default function View() {
     });
 
     if (res.ok) {
-      await queryClient.invalidateQueries({ queryKey: ["post", id] });
-      await queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["post", id] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
     }
   };
 
@@ -54,8 +55,8 @@ export default function View() {
     });
 
     if (res.ok) {
-      await queryClient.invalidateQueries({ queryKey: ["post", id] });
-      await queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["post", id] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
     }
   };
 

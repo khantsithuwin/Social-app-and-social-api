@@ -26,7 +26,8 @@ export default function PostCard({ post, onDeleted }) {
   const [liked, setLiked] = useState(post.likedByMe ?? false);
   const [likesCount, setLikesCount] = useState(post.likesCount ?? 0);
 
-  const deletePost = async () => {
+  const deletePost = async (e) => {
+    e.stopPropagation();
     const token = localStorage.getItem("token");
 
     const res = await fetch(`http://localhost:8800/posts/${post.id}`, {
@@ -37,13 +38,14 @@ export default function PostCard({ post, onDeleted }) {
     });
 
     if (res.ok) {
-      await queryClient.invalidateQueries({ queryKey: ["posts"] });
-      await queryClient.invalidateQueries({ queryKey: ["post", String(post.id)] });
       onDeleted?.();
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["user", post.userId] });
     }
   };
 
-  const toggleLike = async () => {
+  const toggleLike = async (e) => {
+    e.stopPropagation();
     const token = localStorage.getItem("token");
     if (!token) return navigate("/login");
 
@@ -66,7 +68,10 @@ export default function PostCard({ post, onDeleted }) {
   };
 
   return (
-    <Card sx={{ mb: 2, borderRadius: 5 }}>
+    <Card
+      sx={{ mb: 2, borderRadius: 5, cursor: "pointer" }}
+      onClick={() => navigate(`/view/${post.id}`)}
+    >
       <CardContent>
         <Box sx={{ display: "flex", gap: 2 }}>
           <Box>
@@ -81,10 +86,7 @@ export default function PostCard({ post, onDeleted }) {
             <Typography sx={{ fontSize: 12, color: green[500] }}>
               {post.created}
             </Typography>
-            <Typography
-              sx={{ mt: 1 }}
-              onClick={() => navigate(`/view/${post.id}`)}
-            >
+            <Typography sx={{ mt: 1 }}>
               {post.content}
             </Typography>
           </Box>
@@ -101,18 +103,21 @@ export default function PostCard({ post, onDeleted }) {
         </Box>
         <Box sx={{ mt: 2, display: "flex", justifyContent: "space-around" }}>
           <ButtonGroup>
-            <IconButton size="sm" onClick={toggleLike}>
+            <IconButton size="small" onClick={toggleLike}>
               {liked ? <LikeFilledIcon color="error" /> : <LikeOutlineIcon color="error" />}
             </IconButton>
-            <Button size="sm" variant="text">
+            <Button size="small" variant="text">
               {likesCount}
             </Button>
           </ButtonGroup>
           <ButtonGroup>
-            <IconButton size="sm">
+            <IconButton size="small" onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/view/${post.id}`);
+            }}>
               <CommentIcon sx={{ color: "gray" }}></CommentIcon>
             </IconButton>
-            <Button size="sm" variant="text">
+            <Button size="small" variant="text">
               {post.comments ? post.comments.length : 0}
             </Button>
           </ButtonGroup>
